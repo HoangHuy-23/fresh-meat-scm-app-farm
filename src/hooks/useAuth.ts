@@ -29,6 +29,7 @@ export const loginUser = createAsyncThunk(
       const response = await AuthApi.logIn(credentials.email, credentials.password);
       const { token } = response;
       await SecureStore.setItemAsync('userToken', token);
+      console.log('Login successful, token stored:', token);
       return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');

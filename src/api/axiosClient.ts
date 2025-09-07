@@ -3,6 +3,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://fccf395eabbd.ngrok-free.app/api/v1';
 const PUBLIC_API_URL = [
@@ -32,7 +33,9 @@ axiosClient.interceptors.request.use(
       return config;
     }
 
-    const token = await AsyncStorage.getItem('userToken');
+    const token = await SecureStore.getItemAsync('userToken');
+
+    console.log('Attaching token to request:', token);
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -56,7 +59,7 @@ axiosClient.interceptors.response.use(
       if (status === 401) {
         console.log('Authentication Error: Token is invalid or expired.');
 
-        AsyncStorage.removeItem('userToken');
+        SecureStore.deleteItemAsync('userToken');
       } else if (status === 500) {
         console.error('Server Error:', error.response.data);
       }

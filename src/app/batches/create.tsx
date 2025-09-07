@@ -1,4 +1,7 @@
 // src/app/batches/create.tsx
+import { BatchApi } from "@/src/api/batchApi";
+import { fetchBatches } from "@/src/hooks/useBatches";
+import { AppDispatch } from "@/src/store/store";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -9,9 +12,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useDispatch } from "react-redux";
 
 export default function CreateProduct() {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
 
   const [type, setType] = useState("heo");
   const [batchName, setBatchName] = useState("");
@@ -21,24 +26,46 @@ export default function CreateProduct() {
   const [feed, setFeed] = useState("");
   const [medications, setMedications] = useState("");
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
+    // Tạo assetID ngẫu nhiên
+    const assetID = "FARM-BATCH-" + Math.random().toString(36).substr(2, 9);
+
+    // Chia feed/medications từ input multiline thành mảng
+    const feedArray = feed
+      .split("\n")
+      .map((f) => f.trim())
+      .filter(Boolean);
+    const medicationsArray = medications
+      .split("\n")
+      .map((m) => m.trim())
+      .filter(Boolean);
+
+    // Tạo payload object
     const payload = {
-      assetID: batchName,
-      productName: type,
+      assetID,
+      productName: batchName,
       quantity: { unit: "con", value: Number(quantity) },
-      details: JSON.stringify({
+      details: {
+        sowingDate: startDate,
         startDate,
         expectedHarvestDate,
-        feed: feed.split("\n").filter(Boolean),
-        medications: medications.split("\n").filter(Boolean),
-        certificates: [],
-      }),
+        feed: feedArray,
+        medications: medicationsArray,
+      },
     };
 
     console.log("Payload gửi API:", payload);
-    // TODO: gọi API tạo lô với payload
 
-    router.back(); // quay về danh sách
+    try {
+      await BatchApi.createBatch(payload);
+      console.log("Tạo lô thành công");
+      // await dispatch(fetchBatches()).unwrap(); // load lại danh sách lô
+      router.back(); // quay về danh sách lô
+    } catch (error) {
+      console.error("Error creating batch:", error);
+    } finally {
+      console.log("Request to create batch completed");
+    }
   };
 
   return (
