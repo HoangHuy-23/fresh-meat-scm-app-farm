@@ -5,7 +5,7 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'ax
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://fccf395eabbd.ngrok-free.app/api/v1';
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://2e53a11bd610.ngrok-free.app/api/v1';
 const PUBLIC_API_URL = [
   { urlPattern: /\/asserts(\/.*)?$/, methods: ['GET'] },
   { urlPattern: /\/auth\/login$/, methods: ['POST'] },

@@ -1,13 +1,31 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Button, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { shipmentApi } from "@/src/api/shipmentApi";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
+import {
+  Alert,
+  Button,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function QRCode() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
   const router = useRouter();
+  const isFocused = useIsFocused();
+
+  // Reset khi màn hình được focus
+  useFocusEffect(
+    useCallback(() => {
+      setScanned(false);
+      setScannedData(null);
+    }, [])
+  );
 
   if (!permission) {
     return <View />;
@@ -25,12 +43,59 @@ export default function QRCode() {
   }
 
   // Hàm xử lý khi quét được mã
-  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+  const handleBarCodeScanned = ({
+    type,
+    data,
+  }: {
+    type: string;
+    data: string;
+  }) => {
     if (!scanned) {
       setScanned(true);
-      setScannedData(data);
-      Alert.alert('Quét thành công!', `Dữ liệu: ${data}`);
-      // router.push(`/confirmation?data=${encodeURIComponent(data)}`);
+
+      try {
+        // Parse JSON từ chuỗi data
+        const parsed = JSON.parse(data);
+
+        // Lấy các field chính
+        const shipmentID = parsed.shipmentID;
+        const facilityID = parsed.facilityID;
+        const action = parsed.action;
+
+        // Lấy chi tiết item (ở đây chỉ có 1 item, nhưng có thể nhiều)
+        const items = parsed.items || [];
+        const firstItem = items[0]; // lấy item đầu tiên
+        const assetID = firstItem?.assetID;
+        const quantityValue = firstItem?.quantity?.value;
+        const quantityUnit = firstItem?.quantity?.unit;
+
+        // call API xác nhận đã nhận lô hàng
+        const confirmPickup = async () => {
+          try {
+            const response = await shipmentApi.confirmPickupShipment(shipmentID, {
+              facilityID,
+              actualItems: [
+                {
+                  assetID,
+                  quantity: {
+                    value: quantityValue,
+                    unit: quantityUnit,
+                  },
+                },
+              ],
+            });
+            console.log("Confirm pickup response:", response);
+            Alert.alert("Thành công", "Đã xác nhận nhận lô hàng");
+          } catch (error) {
+            Alert.alert("Lỗi", "Không thể xác nhận nhận lô hàng");
+            console.error("Confirm pickup error:", error);
+          }
+        };
+        confirmPickup();
+      } catch (err) {
+        Alert.alert("Lỗi", "Không thể phân tích dữ liệu QR");
+        console.error("Parse QR error:", err);
+      }
     }
   };
 
@@ -43,12 +108,14 @@ export default function QRCode() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* Camera background */}
-      <CameraView
-        style={{ flex: 1 }}
-        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-        barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-        facing="back"
-      />
+      {isFocused && (
+        <CameraView
+          style={{ flex: 1 }}
+          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+          barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+          facing="back"
+        />
+      )}
 
       {/* Overlay */}
       <View className="absolute inset-0 justify-between items-center">
