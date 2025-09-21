@@ -86,6 +86,9 @@ export default function BatchDetail() {
           Số lượng ban đầu: {Batch.originalQuantity.value} {Batch.originalQuantity.unit}
         </Text>
         <Text className="mb-1">
+          Số lượng hiện tại: {Batch.currentQuantity.value} {Batch.currentQuantity.unit}
+        </Text>
+        <Text className="mb-1">
           Ngày bắt đầu nuôi: {Batch.history[0].details.startDate}
         </Text>
         <Text className="mb-1">
