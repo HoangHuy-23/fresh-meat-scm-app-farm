@@ -4,11 +4,11 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 
 // --- TypeScript Interfaces ---
@@ -69,16 +69,10 @@ export default function ShipmentDetail() {
   }, [fetchShipmentDetail]);
 
   if (loading) return <ActivityIndicator size="large" className="flex-1" />;
-  if (error || !shipment)
-    return <Text className="text-center mt-10 text-red-500">{error}</Text>;
+  if (error || !shipment) return <Text className="text-center mt-10 text-red-500">{error}</Text>;
 
-  const statusInfo = statusConfig[shipment.status] || {
-    color: "bg-gray-500",
-    text: shipment.status,
-  };
-  const pickupStop = shipment.stops.find(
-    (s) => s.facilityID === MY_FARM_ID && s.action === "PICKUP"
-  );
+  const statusInfo = statusConfig[shipment.status] || { color: "bg-gray-500", text: shipment.status };
+  const pickupStop = shipment.stops.find(s => s.facilityID === MY_FARM_ID && s.action === 'PICKUP');
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -87,22 +81,16 @@ export default function ShipmentDetail() {
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialCommunityIcons name="arrow-left" size={28} color="white" />
         </TouchableOpacity>
-        <Text className="text-white font-bold text-xl">
-          Chi tiết chuyến hàng
-        </Text>
+        <Text className="text-white font-bold text-xl">Chi tiết chuyến hàng</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Basic Info */}
         <View className="bg-white p-4 rounded-2xl shadow-sm mb-6">
           <View className="flex-row justify-between items-start mb-4">
-            <Text className="text-xl font-bold text-primary w-4/5">
-              {shipment.shipmentID}
-            </Text>
+            <Text className="text-xl font-bold text-primary w-4/5">{shipment.shipmentID}</Text>
             <View className={`px-3 py-1 rounded-full ${statusInfo.color}`}>
-              <Text className="text-white text-xs font-bold">
-                {statusInfo.text}
-              </Text>
+              <Text className="text-white text-xs font-bold">{statusInfo.text}</Text>
             </View>
           </View>
           <InfoRow label="Tài xế" value={shipment.driverName} />
@@ -116,16 +104,9 @@ export default function ShipmentDetail() {
               Hàng hóa cần bàn giao
             </Text>
             {pickupStop.items.map((item, index) => (
-              <View
-                key={index}
-                className="flex-row justify-between items-center bg-gray-50 p-3 rounded-lg mb-2"
-              >
-                <Text className="font-semibold text-gray-700">
-                  {item.assetID}
-                </Text>
-                <Text className="text-gray-600">
-                  {item.quantity.value} {item.quantity.unit}
-                </Text>
+              <View key={index} className="flex-row justify-between items-center bg-gray-50 p-3 rounded-lg mb-2">
+                <Text className="font-semibold text-gray-700">{item.assetID}</Text>
+                <Text className="text-gray-600">{item.quantity.value} {item.quantity.unit}</Text>
               </View>
             ))}
           </View>
@@ -133,17 +114,13 @@ export default function ShipmentDetail() {
       </ScrollView>
 
       {/* Confirmation Button */}
-      {pickupStop?.status === "PENDING" && (
+      {pickupStop?.status === 'PENDING' && (
         <View className="p-4 bg-white border-t border-gray-200">
           <TouchableOpacity
             onPress={() => router.push(`/qrCode`)}
             className="bg-primary rounded-2xl py-4 flex-row justify-center items-center space-x-2"
           >
-            <MaterialCommunityIcons
-              name="qrcode-scan"
-              size={22}
-              color="white"
-            />
+            <MaterialCommunityIcons name="qrcode-scan" size={22} color="white" />
             <Text className="text-center text-white font-bold text-lg">
               Xác nhận bàn giao (QR)
             </Text>
