@@ -1,22 +1,27 @@
 // lib/apiClient.ts
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import Constants from 'expo-constants';
-import * as SecureStore from 'expo-secure-store';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+} from "axios";
+import Constants from "expo-constants";
+import * as SecureStore from "expo-secure-store";
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://2e53a11bd610.ngrok-free.app/api/v1';
+const API_URL =
+  Constants.expoConfig?.extra?.apiUrl ||
+  "https://bc124e0270e9.ngrok-free.app/api/v1";
 const PUBLIC_API_URL = [
-  { urlPattern: /\/asserts(\/.*)?$/, methods: ['GET'] },
-  { urlPattern: /\/auth\/login$/, methods: ['POST'] },
-  { urlPattern: /\/auth\/register$/, methods: ['POST'] },
+  { urlPattern: /\/asserts(\/.*)?$/, methods: ["GET"] },
+  { urlPattern: /\/auth\/login$/, methods: ["POST"] },
+  { urlPattern: /\/auth\/register$/, methods: ["POST"] },
 ];
 
 const axiosClient: AxiosInstance = axios.create({
   baseURL: API_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -24,18 +29,18 @@ axiosClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const isPublicEndpoint = PUBLIC_API_URL.some(
       (endpoint) =>
-        endpoint.urlPattern.test(config.url || '') &&
+        endpoint.urlPattern.test(config.url || "") &&
         (endpoint.methods.length === 0 ||
-          endpoint.methods.includes(config.method?.toUpperCase() || '')),
+          endpoint.methods.includes(config.method?.toUpperCase() || ""))
     );
 
     if (isPublicEndpoint) {
       return config;
     }
 
-    const token = await SecureStore.getItemAsync('userToken');
+    const token = await SecureStore.getItemAsync("userToken");
 
-    console.log('Attaching token to request:', token);
+    console.log("Attaching token to request:", token);
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -45,7 +50,7 @@ axiosClient.interceptors.request.use(
   },
   (error: AxiosError) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 axiosClient.interceptors.response.use(
@@ -57,20 +62,20 @@ axiosClient.interceptors.response.use(
       const { status } = error.response;
 
       if (status === 401) {
-        console.log('Authentication Error: Token is invalid or expired.');
+        console.log("Authentication Error: Token is invalid or expired.");
 
-        SecureStore.deleteItemAsync('userToken');
+        SecureStore.deleteItemAsync("userToken");
       } else if (status === 500) {
-        console.error('Server Error:', error.response.data);
+        console.error("Server Error:", error.response.data);
       }
     } else if (error.request) {
-      console.error('Network Error: No response received.', error.request);
+      console.error("Network Error: No response received.", error.request);
     } else {
-      console.error('Error setting up request:', error.message);
+      console.error("Error setting up request:", error.message);
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default axiosClient;
