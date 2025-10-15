@@ -194,7 +194,8 @@ export default function Shipments() {
   );
 
   const renderShipmentItem = ({ item }: { item: ProcessedShipment }) => (
-    <TouchableOpacity className={`bg-white p-4 mb-3 rounded-2xl shadow-sm`}
+    <TouchableOpacity
+      className={`bg-white p-4 mb-3 rounded-2xl shadow-sm`}
       onPress={() =>
         router.push({
           pathname: `/shipments/[id]`,
@@ -269,7 +270,9 @@ export default function Shipments() {
     <View className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="px-4 pt-10 pb-2 bg-primary shadow-md">
-        <Text className="text-white font-bold text-xl">Vận chuyển</Text>
+        <Text className="text-2xl font-bold text-white text-center w-full">
+          Vận chuyển
+        </Text>
       </View>
 
       {/* Tab Switcher */}

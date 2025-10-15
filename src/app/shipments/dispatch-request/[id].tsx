@@ -1,7 +1,9 @@
 // src/app/shipments/[id].tsx
+import { shipmentApi } from "@/src/api/shipmentApi";
+import { mapUnitToVietnamese } from "@/src/constants/Utils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -9,8 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import axios from "axios";
-import { shipmentApi } from "@/src/api/shipmentApi";
 
 // --- TypeScript Interfaces for API data ---
 interface Item {
@@ -99,13 +99,23 @@ export default function DispatchRequestDetail() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="px-4 pt-10 pb-4 bg-primary flex-row items-center space-x-4 shadow-md">
-        <TouchableOpacity onPress={() => router.back()}>
-          <MaterialCommunityIcons name="arrow-left" size={28} color="white" />
+      <View className="px-4 pt-10 pb-3 bg-primary shadow-md  space-x-4">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="flex-row items-center"
+        >
+          <MaterialCommunityIcons
+            name="step-backward"
+            size={28}
+            color="white"
+            className=""
+          />
+          <View className="w-full -ml-6">
+            <Text className="text-white font-bold text-2xl text-center">
+              Yêu cầu xuất lô
+            </Text>
+          </View>
         </TouchableOpacity>
-        <Text className="text-white font-bold text-xl">
-          Chi tiết yêu cầu
-        </Text>
       </View>
 
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
@@ -116,7 +126,9 @@ export default function DispatchRequestDetail() {
               {request.requestID}
             </Text>
             <View className={`px-3 py-1 rounded-full ${statusInfo.color}`}>
-              <Text className="text-white text-xs font-bold">{statusInfo.text}</Text>
+              <Text className="text-white text-xs font-bold">
+                {statusInfo.text}
+              </Text>
             </View>
           </View>
           <InfoRow
@@ -129,15 +141,19 @@ export default function DispatchRequestDetail() {
 
         {/* Items List Card */}
         <View className="bg-white p-4 rounded-2xl shadow-sm mb-6">
-          <Text className="text-lg font-bold mb-3">Các lô hàng trong yêu cầu</Text>
+          <Text className="text-lg font-bold mb-3">
+            Các lô hàng trong yêu cầu
+          </Text>
           {request.items.map((item, index) => (
             <View
               key={index}
               className="flex-row justify-between items-center bg-gray-50 p-3 rounded-lg mb-2"
             >
-              <Text className="font-semibold text-gray-700">{item.assetID}</Text>
+              <Text className="font-semibold text-gray-700">
+                {item.assetID}
+              </Text>
               <Text className="text-gray-600">
-                {item.quantity.value} {item.quantity.unit}
+                {item.quantity.value} {mapUnitToVietnamese(item.quantity.unit)}
               </Text>
             </View>
           ))}

@@ -56,15 +56,31 @@ const InitialLayout = () => {
         <Stack.Screen name="batches/create" options={{ headerShown: false }} />
         <Stack.Screen name="batches/[id]" options={{ headerShown: false }} />
         <Stack.Screen
-          name="batches/update/[id]"
+          name="batches/update-average-weight/[id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="batches/update-expected-harvest-date/[id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="batches/update-feeds/[id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="batches/update-medications/[id]"
           options={{ headerShown: false }}
         />
         <Stack.Screen
           name="batches/update-certificates/[id]"
           options={{ headerShown: false }}
         />
+
         {/* Shipments screens */}
-        <Stack.Screen name="shipments/dispatch-request/[id]" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="shipments/dispatch-request/[id]"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="shipments/[id]" options={{ headerShown: false }} />
         <Stack.Screen
           name="shipments/create"
