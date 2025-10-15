@@ -10,7 +10,7 @@ import * as SecureStore from "expo-secure-store";
 
 const API_URL =
   Constants.expoConfig?.extra?.apiUrl ||
-  "https://1c4dfc81545e.ngrok-free.app/api/v1";
+  "https://878f1b826bb6.ngrok-free.app/api/v1";
 const PUBLIC_API_URL = [
   { urlPattern: /\/asserts(\/.*)?$/, methods: ["GET"] },
   { urlPattern: /\/auth\/login$/, methods: ["POST"] },

@@ -61,7 +61,8 @@ const ImagePickerInput: React.FC<ImagePickerInputProps> = ({
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
+      // aspect: [4, 3],
+
       quality: 1,
     });
 
@@ -75,13 +76,13 @@ const ImagePickerInput: React.FC<ImagePickerInputProps> = ({
       <Text className="text-base font-bold text-gray-700 mb-2">{label}</Text>
       <TouchableOpacity
         onPress={pickImage}
-        className="h-48 border-2 border-dashed border-gray-300 rounded-lg justify-center items-center bg-gray-50 overflow-hidden"
+        className={` border-2 border-dashed border-gray-300 rounded-lg justify-center items-center bg-gray-50 overflow-hidden ${imageUri ? "h-96" : "h-32"}`}
       >
         {imageUri ? (
           <Image
             source={{ uri: imageUri }}
             className="w-full h-full"
-            resizeMode="cover"
+            resizeMode="contain"
           />
         ) : (
           <View className="items-center">

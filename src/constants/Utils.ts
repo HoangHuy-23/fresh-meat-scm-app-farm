@@ -21,23 +21,18 @@ export const mapUnitToVietnamese = (unit: string) => {
   }
 };
 
-export const getStatusStyle = (status: string) => {
-  console.log("getStatusStyle called with status:", status);
+export const getStatusColors = (status: string) => {
   switch (status) {
     case "AT_FARM":
-      return "bg-green-100 text-green-700";
+      return { bg: "#dcfce7", text: "#15803d" }; // green-100, green-700
     case "PARTIALLY_SHIPPED":
-      return "bg-yellow-100 text-yellow-700";
-    case "Sẵn sàng xuất":
-      return "bg-blue-100 text-blue-700";
-    case "Sắp hết hạn":
-      return "bg-red-100 text-red-700";
+      return { bg: "#fef3c7", text: "#a16207" }; // yellow-100, yellow-700
     case "SHIPPED":
-      return "bg-purple-100 text-purple-700";
+      return { bg: "#e9d5ff", text: "#7e22ce" }; // purple-100, purple-700
     case "COMPLETED":
-      return "bg-gray-100 text-gray-700";
+      return { bg: "#f3f4f6", text: "#374151" }; // gray-100, gray-700
     default:
-      return "bg-gray-100 text-gray-600";
+      return { bg: "#f3f4f6", text: "#6b7280" }; // gray-100, gray-600
   }
 };
 

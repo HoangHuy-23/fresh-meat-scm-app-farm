@@ -1,4 +1,4 @@
-import { getStatusStyle, getStatusText } from "@/src/constants/Utils";
+import { getStatusColors, getStatusText } from "@/src/constants/Utils";
 import { fetchBatches } from "@/src/hooks/useBatches";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -79,13 +79,17 @@ export default function BatchesScreen() {
                   Số lượng: {item.currentQuantity.value}
                 </Text>
               </View>
-              <Text
-                className={`px-3 py-1 text-xs rounded-full ${getStatusStyle(
-                  item.status
-                )}`}
+              <View
+                className="px-3 py-1 rounded-full"
+                style={{ backgroundColor: getStatusColors(item.status).bg }}
               >
-                {getStatusText(item.status)}
-              </Text>
+                <Text
+                  className="text-xs font-semibold"
+                  style={{ color: getStatusColors(item.status).text }}
+                >
+                  {getStatusText(item.status)}
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
         )}
@@ -96,7 +100,7 @@ export default function BatchesScreen() {
       {/* Floating Add Button */}
       <TouchableOpacity
         onPress={() => router.push("/batches/create")}
-        className="absolute bottom-6 right-6 bg-[#28A745] w-14 h-14 rounded-full items-center justify-center shadow-lg"
+        className="absolute bottom-6 right-6 bg-primary w-14 h-14 rounded-full items-center justify-center shadow-lg"
       >
         <MaterialCommunityIcons name="plus" size={28} color="white" />
       </TouchableOpacity>
