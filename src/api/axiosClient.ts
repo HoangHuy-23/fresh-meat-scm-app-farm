@@ -7,7 +7,7 @@ import axios, {
 } from "axios";
 import * as SecureStore from "expo-secure-store";
 
-const API_URL = "https://9a8e81421d04.ngrok-free.app/api/v1";
+const API_URL = "https://4a49803555a0.ngrok-free.app/api/v1";
 const PUBLIC_API_URL = [
   { urlPattern: /\/asserts(\/.*)?$/, methods: ["GET"] },
   { urlPattern: /\/auth\/login$/, methods: ["POST"] },
