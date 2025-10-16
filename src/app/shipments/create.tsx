@@ -1,22 +1,22 @@
 // src/app/shipments/create.tsx
+import { shipmentApi } from "@/src/api/shipmentApi";
+import { mapUnitToVietnamese } from "@/src/constants/Utils";
+import { fetchBatches } from "@/src/hooks/useBatches";
+import { AppDispatch, RootState } from "@/src/store/store";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  View,
+  Alert,
+  SafeAreaView,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-  Alert,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/src/store/store";
-import { useFocusEffect } from "@react-navigation/native";
-import { fetchBatches } from "@/src/hooks/useBatches";
-import axios from "axios";
-import { shipmentApi } from "@/src/api/shipmentApi";
 
 // Interface for a single item in the dispatch request
 interface Item {
@@ -58,7 +58,10 @@ export default function CreateShipment() {
 
     const parsedQuantity = parseInt(quantity, 10);
     if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
-      Alert.alert("Số lượng không hợp lệ", "Số lượng phải là một số lớn hơn 0.");
+      Alert.alert(
+        "Số lượng không hợp lệ",
+        "Số lượng phải là một số lớn hơn 0."
+      );
       return;
     }
 
@@ -109,7 +112,10 @@ export default function CreateShipment() {
 
   const handleCreate = async () => {
     if (selectedItems.length === 0) {
-      Alert.alert("Chưa có hàng", "Vui lòng thêm ít nhất một lô hàng để tạo yêu cầu.");
+      Alert.alert(
+        "Chưa có hàng",
+        "Vui lòng thêm ít nhất một lô hàng để tạo yêu cầu."
+      );
       return;
     }
 
@@ -137,11 +143,23 @@ export default function CreateShipment() {
   return (
     <SafeAreaView className="flex-1">
       {/* Header */}
-      <View className="px-4 pt-10 pb-2 bg-primary shadow-md justify-start flex-row items-center">
-        <TouchableOpacity onPress={() => router.back()} className="mr-2">
-          <MaterialCommunityIcons name="arrow-left" size={28} color="white" />
+      <View className="px-4 pt-10 pb-3 bg-primary shadow-md  space-x-4">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="flex-row items-center"
+        >
+          <MaterialCommunityIcons
+            name="step-backward"
+            size={28}
+            color="white"
+            className=""
+          />
+          <View className="w-full -ml-6">
+            <Text className="text-white font-bold text-2xl text-center">
+              Thêm yêu cầu xuất lô
+            </Text>
+          </View>
         </TouchableOpacity>
-        <Text className="text-white font-bold text-xl">Tạo yêu cầu xuất lô</Text>
       </View>
       <ScrollView
         className="flex-1 bg-white p-4"
@@ -160,13 +178,21 @@ export default function CreateShipment() {
                 isAdded
                   ? "bg-gray-200 border-gray-300"
                   : selectedBatchId === b.assetID
-                  ? "border-primary bg-primary/10"
-                  : "border-gray-300"
+                    ? "border-primary bg-primary/10"
+                    : "border-gray-300"
               }`}
             >
-              <Text className={isAdded ? "text-gray-400" : "text-gray-800"}>
-                {b.productName} - Tồn kho: {b.currentQuantity.value} {b.currentQuantity.unit}
-              </Text>
+              <View>
+                <Text
+                  className={`${isAdded ? "text-gray-400" : "text-gray-800"} font-bold`}
+                >
+                  {b.productName} ({b.assetID})
+                </Text>
+                <Text className={isAdded ? "text-gray-400" : "text-gray-800"}>
+                  Tồn kho: {b.currentQuantity.value}{" "}
+                  {mapUnitToVietnamese(b.currentQuantity.unit)}
+                </Text>
+              </View>
             </TouchableOpacity>
           );
         })}
@@ -179,8 +205,8 @@ export default function CreateShipment() {
               <TextInput
                 className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
                 placeholder={`Tối đa: ${
-                  batches.find((b) => b.assetID === selectedBatchId)?.currentQuantity
-                    .value
+                  batches.find((b) => b.assetID === selectedBatchId)
+                    ?.currentQuantity.value
                 }`}
                 keyboardType="numeric"
                 value={quantity}
@@ -218,7 +244,9 @@ export default function CreateShipment() {
                     Số lượng: {item.quantity.value} {item.quantity.unit}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => handleRemoveItem(item.assetID)}>
+                <TouchableOpacity
+                  onPress={() => handleRemoveItem(item.assetID)}
+                >
                   <MaterialCommunityIcons
                     name="close-circle"
                     size={24}
