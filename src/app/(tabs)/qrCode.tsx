@@ -147,9 +147,17 @@ export default function QRCode() {
               </TouchableOpacity>
             </>
           ) : (
+            <>
             <Text className="text-white text-base text-center p-5">
               Di chuyển camera đến gần mã QR để quét
             </Text>
+            <TouchableOpacity
+              className="bg-blue-500 py-3 px-8 rounded-lg"
+              onPress={() => router.back()}
+            >
+              <Text className="text-white text-lg font-bold">Hủy</Text>
+            </TouchableOpacity>
+          </>
           )}
         </View>
       </View>

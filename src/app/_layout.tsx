@@ -64,6 +64,7 @@ const InitialLayout = () => {
           options={{ headerShown: false }}
         />
         {/* Shipments screens */}
+        <Stack.Screen name="shipments/dispatch-request/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="shipments/[id]" options={{ headerShown: false }} />
         <Stack.Screen
           name="shipments/create"

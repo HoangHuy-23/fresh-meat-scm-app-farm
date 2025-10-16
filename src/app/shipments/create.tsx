@@ -1,5 +1,5 @@
 // src/app/shipments/create.tsx
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -7,122 +7,245 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/src/store/store";
+import { useFocusEffect } from "@react-navigation/native";
+import { fetchBatches } from "@/src/hooks/useBatches";
+import axios from "axios";
+import { shipmentApi } from "@/src/api/shipmentApi";
 
-// Giả lập danh sách lô hàng có thể xuất
-const mockBatches = [
-  { id: "B001", name: "Heo đợt 1 tháng 9" },
-  { id: "B002", name: "Gà đợt 2 tháng 8" },
-  { id: "B003", name: "Heo đợt 2 tháng 7" },
-];
+// Interface for a single item in the dispatch request
+interface Item {
+  assetID: string;
+  quantity: {
+    unit: string;
+    value: number;
+  };
+}
 
 export default function CreateShipment() {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const { batches, error, status } = useSelector(
+    (state: RootState) => state.batches
+  );
 
-  const [batchId, setBatchId] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [destination, setDestination] = useState("");
-  const [date, setDate] = useState("");
-  const [note, setNote] = useState("");
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchBatches());
+    }, [dispatch])
+  );
 
-  const handleCreate = () => {
-    // TODO: gọi API gửi yêu cầu xuất lô
-    console.log("Tạo yêu cầu xuất:", {
-      batchId,
-      quantity,
-      destination,
-      date,
-      note,
-    });
+  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+  const [quantity, setQuantity] = useState<string>("");
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
-    // Sau khi tạo xong → quay về danh sách shipment
-    router.back();
+  const handleSelectBatch = (batchId: string) => {
+    setSelectedBatchId(batchId);
+    setQuantity(""); // Reset quantity when selecting a new batch
   };
+
+  const handleAddItem = () => {
+    // 1. Validation checks
+    if (!selectedBatchId || !quantity) {
+      Alert.alert("Thiếu thông tin", "Vui lòng chọn lô hàng và nhập số lượng.");
+      return;
+    }
+
+    const parsedQuantity = parseInt(quantity, 10);
+    if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+      Alert.alert("Số lượng không hợp lệ", "Số lượng phải là một số lớn hơn 0.");
+      return;
+    }
+
+    // 2. Prevent adding duplicates
+    const isAlreadyAdded = selectedItems.some(
+      (item) => item.assetID === selectedBatchId
+    );
+    if (isAlreadyAdded) {
+      Alert.alert("Lỗi", "Lô hàng này đã được thêm vào danh sách.");
+      return;
+    }
+
+    // 3. Validate against available stock
+    const batch = batches.find((b) => b.assetID === selectedBatchId);
+    if (!batch) {
+      Alert.alert("Lỗi", "Không tìm thấy thông tin lô hàng.");
+      return;
+    }
+    const availableQuantity = batch.currentQuantity.value;
+    if (parsedQuantity > availableQuantity) {
+      Alert.alert(
+        "Vượt quá số lượng",
+        `Số lượng xuất (${parsedQuantity}) không được vượt quá số lượng tồn kho (${availableQuantity}).`
+      );
+      return;
+    }
+
+    // Add item to the list
+    const newItem: Item = {
+      assetID: selectedBatchId,
+      quantity: {
+        unit: batch.currentQuantity.unit || "con",
+        value: parsedQuantity,
+      },
+    };
+
+    setSelectedItems([...selectedItems, newItem]);
+    // Reset inputs after adding
+    setSelectedBatchId(null);
+    setQuantity("");
+  };
+
+  const handleRemoveItem = (assetIDToRemove: string) => {
+    setSelectedItems(
+      selectedItems.filter((item) => item.assetID !== assetIDToRemove)
+    );
+  };
+
+  const handleCreate = async () => {
+    if (selectedItems.length === 0) {
+      Alert.alert("Chưa có hàng", "Vui lòng thêm ít nhất một lô hàng để tạo yêu cầu.");
+      return;
+    }
+
+    try {
+      const response = await shipmentApi.createDispatchRequest({
+        items: selectedItems,
+      });
+      if (response) {
+        Alert.alert("Thành công", "Yêu cầu xuất lô đã được tạo thành công.", [
+          {
+            text: "OK",
+            onPress: () => router.push("/(tabs)/shipments"),
+          },
+        ]);
+      }
+    } catch (error: any) {
+      console.error("API call error:", error);
+      Alert.alert("Lỗi", `Đã xảy ra lỗi: ${error.message}`);
+    }
+  };
+
+  // Create a Set of added asset IDs for efficient lookup
+  const addedAssetIDs = new Set(selectedItems.map((item) => item.assetID));
 
   return (
     <SafeAreaView className="flex-1">
       {/* Header */}
       <View className="px-4 pt-10 pb-2 bg-primary shadow-md justify-start flex-row items-center">
-        <TouchableOpacity onPress={() => router.back()} className="">
+        <TouchableOpacity onPress={() => router.back()} className="mr-2">
           <MaterialCommunityIcons name="arrow-left" size={28} color="white" />
         </TouchableOpacity>
         <Text className="text-white font-bold text-xl">Tạo yêu cầu xuất lô</Text>
       </View>
-      <ScrollView className="flex-1 bg-white p-4">
-        {/* <Text className="text-xl font-bold mb-4">Tạo yêu cầu xuất lô</Text> */}
+      <ScrollView
+        className="flex-1 bg-white p-4"
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Batch Selection */}
+        <Text className="mb-2 font-semibold">Chọn lô hàng</Text>
+        {batches.map((b) => {
+          const isAdded = addedAssetIDs.has(b.assetID);
+          return (
+            <TouchableOpacity
+              key={b.assetID}
+              onPress={() => handleSelectBatch(b.assetID)}
+              disabled={isAdded}
+              className={`p-3 mb-2 rounded-xl border ${
+                isAdded
+                  ? "bg-gray-200 border-gray-300"
+                  : selectedBatchId === b.assetID
+                  ? "border-primary bg-primary/10"
+                  : "border-gray-300"
+              }`}
+            >
+              <Text className={isAdded ? "text-gray-400" : "text-gray-800"}>
+                {b.productName} - Tồn kho: {b.currentQuantity.value} {b.currentQuantity.unit}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
 
-      {/* Chọn lô */}
-      <Text className="mb-2 font-semibold">Chọn lô</Text>
-      {mockBatches.map((b) => (
+        {/* Quantity Input and Add Button */}
+        {selectedBatchId && (
+          <>
+            <Text className="mb-2 font-semibold mt-4">Nhập số lượng</Text>
+            <View className="flex-row items-center space-x-2">
+              <TextInput
+                className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+                placeholder={`Tối đa: ${
+                  batches.find((b) => b.assetID === selectedBatchId)?.currentQuantity
+                    .value
+                }`}
+                keyboardType="numeric"
+                value={quantity}
+                onChangeText={setQuantity}
+              />
+              <TouchableOpacity
+                onPress={handleAddItem}
+                className="bg-green-500 rounded-lg px-4 py-3"
+              >
+                <Text className="text-white font-semibold">Thêm</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
+        {/* Selected Items List */}
+        {selectedItems.length > 0 && (
+          <View className="mt-6">
+            <Text className="mb-2 font-semibold text-base">
+              Các lô hàng đã chọn
+            </Text>
+            {selectedItems.map((item) => (
+              <View
+                key={item.assetID}
+                className="flex-row items-center justify-between bg-gray-100 p-3 rounded-lg mb-2"
+              >
+                <View>
+                  <Text className="font-bold text-gray-800">
+                    {
+                      batches.find((b) => b.assetID === item.assetID)
+                        ?.productName
+                    }
+                  </Text>
+                  <Text className="text-gray-600">
+                    Số lượng: {item.quantity.value} {item.quantity.unit}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => handleRemoveItem(item.assetID)}>
+                  <MaterialCommunityIcons
+                    name="close-circle"
+                    size={24}
+                    color="#ef4444"
+                  />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Action Buttons */}
         <TouchableOpacity
-          key={b.id}
-          onPress={() => setBatchId(b.id)}
-          className={`p-3 mb-2 rounded-xl border ${
-            batchId === b.id ? "border-primary bg-primary/10" : "border-gray-300"
-          }`}
+          onPress={handleCreate}
+          className="bg-primary rounded-2xl py-3 mt-6"
         >
-          <Text className="text-gray-800">{b.name}</Text>
+          <Text className="text-center text-white font-semibold text-lg">
+            Gửi yêu cầu
+          </Text>
         </TouchableOpacity>
-      ))}
-
-      {/* Nhập số lượng */}
-      <Text className="mb-2 font-semibold mt-4">Số lượng xuất</Text>
-      <TextInput
-        className="border border-gray-300 rounded-lg px-3 py-2 mb-4"
-        placeholder="Nhập số lượng"
-        keyboardType="numeric"
-        value={quantity}
-        onChangeText={setQuantity}
-      />
-
-      {/* Nơi nhận */}
-      <Text className="mb-2 font-semibold">Nơi nhận</Text>
-      <TextInput
-        className="border border-gray-300 rounded-lg px-3 py-2 mb-4"
-        placeholder="Nhập tên kho / nơi nhận"
-        value={destination}
-        onChangeText={setDestination}
-      />
-
-      {/* Ngày dự kiến */}
-      <Text className="mb-2 font-semibold">Ngày dự kiến</Text>
-      <TextInput
-        className="border border-gray-300 rounded-lg px-3 py-2 mb-4"
-        placeholder="VD: 2025-09-10"
-        value={date}
-        onChangeText={setDate}
-      />
-
-      {/* Ghi chú */}
-      <Text className="mb-2 font-semibold">Ghi chú</Text>
-      <TextInput
-        className="border border-gray-300 rounded-lg px-3 py-2 mb-6"
-        placeholder="Thêm ghi chú (không bắt buộc)"
-        value={note}
-        onChangeText={setNote}
-        multiline
-      />
-
-      {/* Nút tạo */}
-      <TouchableOpacity
-        onPress={handleCreate}
-        className="bg-primary rounded-2xl py-3"
-      >
-        <Text className="text-center text-white font-semibold text-lg">
-          Gửi yêu cầu
-        </Text>
-      </TouchableOpacity>
-
-      {/* Hủy */}
-      <TouchableOpacity
-        onPress={() => router.back()}
-        className="mt-3 border border-gray-300 rounded-2xl py-3"
-      >
-        <Text className="text-center text-gray-700">Hủy</Text>
-      </TouchableOpacity>
-    </ScrollView>
-  </SafeAreaView>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mt-3 border border-gray-300 rounded-2xl py-3 mb-8"
+        >
+          <Text className="text-center text-gray-700">Hủy</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

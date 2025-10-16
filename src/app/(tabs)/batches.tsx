@@ -121,7 +121,7 @@ export default function BatchesScreen() {
       {/* Floating Add Button */}
       <TouchableOpacity
         onPress={() => router.push("/batches/create")}
-        className="absolute bottom-6 right-6 bg-[#FF4D6D] w-14 h-14 rounded-full items-center justify-center shadow-lg"
+        className="absolute bottom-6 right-6 bg-[#28A745] w-14 h-14 rounded-full items-center justify-center shadow-lg"
       >
         <MaterialCommunityIcons name="plus" size={28} color="white" />
       </TouchableOpacity>

@@ -10,9 +10,9 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#FF4D6D", // màu thịt tươi sống chính
-          light: "#FF758F",   // nhạt hơn
-          dark: "#C9184A",    // đậm hơn
+          DEFAULT: "#28A745", // Màu xanh lá cây chủ đạo
+          light: "#52C46E",   // Nhạt hơn, dùng cho hover hoặc background
+          dark: "#1E7E34",    // Đậm hơn, dùng cho active state hoặc text
         },
       },
     },
