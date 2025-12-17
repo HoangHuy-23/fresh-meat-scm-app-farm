@@ -70,7 +70,7 @@ const ProfileScreen = () => {
       <ScrollView>
         <View className="items-center p-6 bg-primary">
           <Image
-            source={{ uri: `https://i.pravatar.cc/150?u=${userInfo.email}` }}
+            source={{ uri: `https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg` }}
             className="w-28 h-28 rounded-full border-4 border-white mb-4 mt-6"
           />
           <Text className="text-2xl font-bold text-white">{userInfo.name}</Text>

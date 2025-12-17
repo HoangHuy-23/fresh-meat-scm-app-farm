@@ -272,7 +272,7 @@ const DashboardScreen: React.FC = () => {
   const router = useRouter();
   const user: User = {
     name: "Nguyễn Văn A",
-    avatar: "https://i.pravatar.cc/150",
+    avatar: "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
   };
   const handleActionPress = (path: string) => {
     console.log(`Navigating to ${path}`);

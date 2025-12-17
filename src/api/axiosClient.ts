@@ -7,7 +7,7 @@ import axios, {
 } from "axios";
 import * as SecureStore from "expo-secure-store";
 
-const API_URL = "https://truck-composition-lips-grove.trycloudflare.com/api/v1";
+const API_URL = "https://t6x2qn32wgar.share.zrok.io/api/v1";
 const PUBLIC_API_URL = [
   { urlPattern: /\/asserts(\/.*)?$/, methods: ["GET"] },
   { urlPattern: /\/auth\/login$/, methods: ["POST"] },
