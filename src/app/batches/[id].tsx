@@ -6,6 +6,8 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Modal,
+  Pressable,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -123,15 +125,16 @@ const ListItemCard: React.FC<ListItemCardProps> = ({
 
 type CertificateCardProps = {
   certificate: Certificate;
+  onPress: () => void;
 };
 
-const CertificateCard: React.FC<CertificateCardProps> = ({ certificate }) => {
+const CertificateCard: React.FC<CertificateCardProps> = ({ certificate, onPress }) => {
   // Dùng optional chaining (?.) để truy cập an toàn và cung cấp ảnh mặc định
   const imageUrl = certificate.media?.url || "https://via.placeholder.com/150";
 
   return (
     <View className="w-1/2 p-1">
-      <TouchableOpacity className="bg-white rounded-lg overflow-hidden border border-gray-200 active:opacity-70">
+      <TouchableOpacity onPress={onPress} className="bg-white rounded-lg overflow-hidden border border-gray-200 active:opacity-70">
         <Image
           source={{ uri: imageUrl }}
           className="w-full h-32 bg-gray-200"
@@ -154,6 +157,9 @@ export default function BatchDetail() {
   // Sử dụng type `Batch` cho state
   const [batch, setBatch] = useState<Batch | null>(null);
 
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+
   // Giả định `state.batches.batches` là một mảng `Batch[]`
   const { batches } = useSelector((state: RootState) => state.batches);
 
@@ -163,6 +169,18 @@ export default function BatchDetail() {
     setBatch(foundBatch || null);
     setLoading(false);
   }, [id, batches]);
+
+  // NEW: Hàm để mở modal với URL ảnh được chọn
+  const handleOpenImage = (url: string) => {
+    setSelectedImageUrl(url);
+    setModalVisible(true);
+  };
+
+  // NEW: Hàm để đóng modal
+  const handleCloseImage = () => {
+    setModalVisible(false);
+    setSelectedImageUrl(null); // Reset URL khi đóng
+  };
 
   if (loading) {
     return (
@@ -335,7 +353,11 @@ export default function BatchDetail() {
           {details?.certificates && details.certificates.length > 0 ? (
             <View className="flex-row flex-wrap -m-1">
               {details.certificates.map((cert, index) => (
-                <CertificateCard key={index} certificate={cert} />
+                <CertificateCard
+                  key={index}
+                  certificate={cert}
+                  onPress={() => handleOpenImage(cert.media?.url || "")}
+                />
               ))}
             </View>
           ) : (
@@ -346,26 +368,30 @@ export default function BatchDetail() {
         </Section>
       </ScrollView>
 
-      {/* Floating Action Buttons */}
-      {/* <TouchableOpacity
-        onPress={() => router.push(`/batches/update/${batch.assetID}`)}
-        className="absolute bottom-6 right-6 bg-[#FF4D6D] w-14 h-14 rounded-full items-center justify-center shadow-lg active:bg-red-600"
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCloseImage} // Cho phép đóng bằng nút back trên Android
       >
-        <MaterialCommunityIcons name="pencil" size={26} color="white" />
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() =>
-          router.push(`/batches/update-certificates/${batch.assetID}`)
-        }
-        className="absolute bottom-24 right-6 bg-[#4DB8FF] w-14 h-14 rounded-full items-center justify-center shadow-lg active:bg-sky-500"
-      >
-        <MaterialCommunityIcons
-          name="certificate-outline"
-          size={26}
-          color="white"
-        />
-      </TouchableOpacity> */}
+        <Pressable
+          onPress={handleCloseImage}
+          className="flex-1 justify-center items-center bg-black/80" // Lớp nền đen mờ
+        >
+          <Image
+            source={{ uri: selectedImageUrl || undefined }}
+            className="w-11/12 h-4/5" // Kích thước ảnh lớn
+            resizeMode="contain" // Hiển thị toàn bộ ảnh không bị cắt
+          />
+          {/* Nút đóng modal */}
+          <TouchableOpacity
+            onPress={handleCloseImage}
+            className="absolute top-12 right-5 bg-white/30 p-2 rounded-full"
+          >
+            <MaterialCommunityIcons name="close" size={28} color="white" />
+          </TouchableOpacity>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

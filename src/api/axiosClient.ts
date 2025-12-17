@@ -8,9 +8,7 @@ import axios, {
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 
-const API_URL =
-  Constants.expoConfig?.extra?.apiUrl ||
-  "https://878f1b826bb6.ngrok-free.app/api/v1";
+const API_URL = "https://t6x2qn32wgar.share.zrok.io/api/v1";
 const PUBLIC_API_URL = [
   { urlPattern: /\/asserts(\/.*)?$/, methods: ["GET"] },
   { urlPattern: /\/auth\/login$/, methods: ["POST"] },
