@@ -10,6 +10,8 @@ import {
   View,
 } from "react-native";
 import "../../../global.css";
+import ChatBot from "../../components/ChatBot";
+import ChatFloatingButton from "../../components/ChatFloatingButton";
 
 // --- Type Definitions (Không đổi) ---
 interface User {
@@ -320,6 +322,10 @@ const DashboardScreen: React.FC = () => {
           ))}
         </Section>
       </ScrollView>
+
+      {/* Chat Components */}
+      <ChatFloatingButton />
+      <ChatBot />
     </SafeAreaView>
   );
 };
