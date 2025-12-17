@@ -5,7 +5,6 @@ import axios, {
   AxiosInstance,
   InternalAxiosRequestConfig,
 } from "axios";
-import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 
 const API_URL = "https://t6x2qn32wgar.share.zrok.io/api/v1";
